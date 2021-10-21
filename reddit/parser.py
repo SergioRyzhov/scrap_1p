@@ -17,11 +17,14 @@ id_list = []
 data = {}
 
 
-
 def get_html(url, params=None):
     response = requests.get(url, headers=HEADERS, params=params)
     return response
 
+
+def save_file(data):
+    with open('reddit.txt', 'w', encoding='utf-8') as fw:
+        fw.write(data)
 
 
 def get_content(html):
@@ -30,10 +33,10 @@ def get_content(html):
     for post in found_posts:
         if post not in id_list and len(id_list) < 100:
             id_list.append(post.get('id'))
-            data['id'] = post.get('id')
-            data['link'] = post.find('a', {'class': '_3jOxDPIQ0KaOWpzvSQo-1s'}).get('href')
-
-
+            data['UNIQUE_ID'] = str(uuid.uuid1())
+            data['post URL'] = post.find(
+                'a', {'class': '_3jOxDPIQ0KaOWpzvSQo-1s'}).get('href')
+            # data['username'] = post.find('div', {'class': '_2mHuuvyV9doV3zwbZPtIPG'})
 
 
 def parse():
@@ -49,7 +52,8 @@ def parse():
         driver = webdriver.Chrome(
             options=options, executable_path='D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe')
         driver.get(html.url)
-        time.sleep(2)
+
+        time.sleep(3)
 
         get_content(html)
 
