@@ -14,7 +14,7 @@ HEADERS = {
 }
 
 id_list = []
-data = {}
+data = []
 
 
 def get_html(url, params=None):
@@ -22,21 +22,28 @@ def get_html(url, params=None):
     return response
 
 
-def save_file(data):
-    with open('reddit.txt', 'w', encoding='utf-8') as fw:
-        fw.write(data)
+def save_file(items):
+    with open('reddit.txt', 'w', newline='', encoding='utf-8') as fw:
+        for item in items:
+            fw.writelines([f"{item['UNIQUE_ID']};", f"{item['post URL']}\n"])
 
 
 def get_content(html):
     soup = bs(html.text, 'html.parser')
     found_posts = soup.find_all('div', {'class': '_1oQyIsiPHYt6nx7VOmd1sz'})
+
     for post in found_posts:
         if post not in id_list and len(id_list) < 100:
             id_list.append(post.get('id'))
-            data['UNIQUE_ID'] = str(uuid.uuid1())
-            data['post URL'] = post.find(
-                'a', {'class': '_3jOxDPIQ0KaOWpzvSQo-1s'}).get('href')
-            # data['username'] = post.find('div', {'class': '_2mHuuvyV9doV3zwbZPtIPG'})
+            data.append({
+                'UNIQUE_ID': str(uuid.uuid1()),
+                'post URL': post.find('a', {'class': '_3jOxDPIQ0KaOWpzvSQo-1s'}).get('href'),
+            })
+    return data
+
+    # data['UNIQUE_ID'] = str(uuid.uuid1())
+    # data['post URL'] = post.find('a', {'class': '_3jOxDPIQ0KaOWpzvSQo-1s'}).get('href')
+    # data['username'] = post.find('div', {'class': '_2mHuuvyV9doV3zwbZPtIPG'})
 
 
 def parse():
@@ -64,10 +71,10 @@ def parse():
             actions.move_to_element(section).perform()
 
             get_content(html)
+        save_file(data)
 
-        # print(id_list)
-        print(data)
-        print(len(id_list), 'end')
+        # print(len(data))
+        # print(len(id_list), 'end')
         # print(html.url)
     else:
         print('error')
