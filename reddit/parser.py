@@ -39,6 +39,11 @@ def save_file(items):
             fw.writelines([f"{item['UNIQUE_ID']};", f"{item['post URL']};\n"])
 
 
+def mouse_over_class_name(path):
+    actions = ActionChains(driver)
+    section = driver.find_element_by_class_name(path)
+    actions.move_to_element(section).perform()
+
 def get_content(html):
     # soup = bs(html.text, 'html.parser')
     found_posts = driver.find_elements_by_class_name('_1oQyIsiPHYt6nx7VOmd1sz')
@@ -46,15 +51,13 @@ def get_content(html):
     for post in found_posts:
         if post.get_attribute('id') not in id_list and len(id_list) < 100:
             id_list.append(post.get_attribute('id'))
-            # data.append({
-            #     'UNIQUE_ID': str(uuid.uuid1()),
-            #     'post URL': post.find('a', {'class': '_3jOxDPIQ0KaOWpzvSQo-1s'}).get('href'),
-                # 'username': post.find('a', {'class': '_2tbHP6ZydRpjI44J3syuqC'}).get_text(),
-            # })
-
-    # data['UNIQUE_ID'] = str(uuid.uuid1())
-    # data['post URL'] = post.find('a', {'class': '_3jOxDPIQ0KaOWpzvSQo-1s'}).get('href')
-    # data['username'] = post.find('div', {'class': '_2mHuuvyV9doV3zwbZPtIPG'})
+            # mouse_over_class_name('_2tbHP6ZydRpjI44J3syuqC')
+            data.append({
+                'UNIQUE_ID': str(uuid.uuid1()),
+                'post URL': post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href'),
+                'number of comments': post.find_element_by_class_name('_1UoeAeSRhOKSNdY_h3iS1O').text,
+                'number of votes': post.find_element_by_class_name('_1E9mcoVn4MYnuBQSVDt1gC').text,
+            })
 
 
 
@@ -64,16 +67,15 @@ def parse():
         driver.get(html.url)
         # actions = ActionChains(driver)
         # time.sleep(3)
-        count = 1
         while len(id_list) < 100:
             get_content(html)
             driver.execute_script("window.scrollTo(50, document.body.scrollHeight);")
             # section = driver.find_element_by_id(id_list[count])
             # actions.move_to_element(section).perform()
-            count += 2
         # save_file(data)
 
-        print(id_list)
+        print(data)
+        # print(id_list)
         print(len(id_list), 'end')
         driver.close()
         driver.quit()
