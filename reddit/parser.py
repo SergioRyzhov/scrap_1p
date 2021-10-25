@@ -56,10 +56,16 @@ def get_content(html):
             username = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
             request = requests.get(f'{HOST}user/{username}/about.json', headers=HEADERS)
             comment_karma = request.json().get('data').get('comment_karma')
-            # print(comment_karma)
+            user_karma = request.json().get('data').get('total_karma')
+            post_karma = request.json().get('data').get('link_karma')
+            print(comment_karma)
             data.append({
                 'UNIQUE_ID': str(uuid.uuid1()),
                 'post URL': post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href'),
+                'username': username,
+                'user karma': int(user_karma),
+                'post karma': int(post_karma),
+                'comment karma': int(comment_karma),
                 'number of comments': post.find_element_by_class_name('_1UoeAeSRhOKSNdY_h3iS1O').text,
                 'number of votes': post.find_element_by_class_name('_1E9mcoVn4MYnuBQSVDt1gC').text,
             })
