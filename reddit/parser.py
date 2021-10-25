@@ -3,7 +3,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup as bs
-import time
 import uuid
 
 URL = 'https://www.reddit.com/top/'
@@ -52,6 +51,7 @@ def get_content(html):
         if post.get_attribute('id') not in id_list and len(id_list) < 100:
             id_list.append(post.get_attribute('id'))
             # mouse_over_class_name('_2tbHP6ZydRpjI44J3syuqC')
+            
             data.append({
                 'UNIQUE_ID': str(uuid.uuid1()),
                 'post URL': post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href'),
