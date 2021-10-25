@@ -2,8 +2,10 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup as bs
+import logging
 import time
 import uuid
 
@@ -18,8 +20,11 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com/'
 
-SCROLL_TIME_SLEEP = 0.5
+SCROLL_TIME_SLEEP = 0.1
 
+logging.basicConfig(level=logging.INFO)
+
+start = time.time()
 id_list = []
 data = []
 
@@ -31,7 +36,9 @@ options.add_argument("--disable-notifications")
 options.add_experimental_option(
     "prefs", {"profile.default_content_setting_values.notifications": 1})
 options.add_experimental_option("excludeSwitches", ["enable-logging"])
-driver = webdriver.Chrome(options=options, executable_path='D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe')
+driver = webdriver.Chrome(
+    options=options, executable_path='D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe')
+
 
 def get_html(url, params=None):
     response = requests.get(url, headers=HEADERS, params=params)
@@ -40,49 +47,77 @@ def get_html(url, params=None):
 
 def save_file(items):
     with open('reddit.txt', 'w', newline='', encoding='utf-8') as fw:
-        for item in items:
-            fw.writelines([
-                f"{item['UNIQUE_ID']};",
-                f"{item['post URL']};",
-                f"{item['username']};",
-                f"{item['user karma']};",
-                f"{item['post karma']};",
-                f"{item['comment karma']};",
-                f"{item['post date']};",
-                f"{item['number of comments']};",
-                f"{item['number of votes']};\n",
-            ])
+        try:
+            for item in items:
+                fw.writelines([
+                    f"{item['UNIQUE_ID']};",
+                    f"{item['post URL']};",
+                    f"{item['username']};",
+                    f"{item['user karma']};",
+                    f"{item['post karma']};",
+                    f"{item['comment karma']};",
+                    f"{item['post date']};",
+                    f"{item['number of comments']};",
+                    f"{item['number of votes']};\n",
+                ])
+            logging.info('File written seccessfully')
+        except:
+            logging.error(
+                'Writefile error. Try to delete last file.txt manually.')
 
 
 def get_content(html):
-    # soup = bs(html.text, 'html.parser')
     found_posts = driver.find_elements_by_class_name('_1oQyIsiPHYt6nx7VOmd1sz')
 
     for post in found_posts:
         if post.get_attribute('id') not in id_list and len(id_list) < 100:
-            id_list.append(post.get_attribute('id'))
-            try:
-                username = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
-                request = requests.get(f'{HOST}user/{username}/about.json', headers=HEADERS)
-                comment_karma = request.json().get('data').get('comment_karma')
-                user_karma = request.json().get('data').get('total_karma')
-                post_karma = request.json().get('data').get('link_karma')
-            except:
-                username = 'noname'
-                comment_karma = 0
-                user_karma = 0
-                post_karma = 0
             try:
                 pub_date_elem = post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s')
                 pub_date_elem.location_once_scrolled_into_view
                 driver.execute_script("window.scrollTo(0, window.scrollY - 60)")
-                # driver.execute_script("arguments[0].scrollIntoView(true);", pub_date_elem)
+                    # driver.execute_script("arguments[0].scrollIntoView(true);", pub_date_elem)
                 ActionChains(driver).move_to_element(pub_date_elem).perform()
+            except:
+                logging.warning("Missed the post focus")
+                continue
+            try:
+                username = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
+            except:
+                logging.warning('Missed the username')
+                continue
+            try:
+                request = requests.get(
+                    f'{HOST}user/{username}/about.json', headers=HEADERS)
+            except:
+                logging.warning(f'Missed the reqest {username}')
+                continue
+            try:
+                comment_karma = request.json().get('data').get('comment_karma')
+            except:
+                logging.warning(f'Missed the comment_karma {username}')
+                continue
+            try:
+                user_karma = request.json().get('data').get('total_karma')
+            except:
+                logging.warning(f'Missed the user_karma {username}')
+                continue
+            try:
+                post_karma = request.json().get('data').get('link_karma')
+            except:
+                logging.warning(f'Missed the post_karma {username}')
+                continue
+            try:
                 time.sleep(SCROLL_TIME_SLEEP)
                 post_date = driver.find_element_by_class_name('_2J_zB4R1FH2EjGMkQjedwc').text
+                # wait = WebDriverWait(driver, 10)
+                # post_date = wait.until(EC.find_element_by_class_name('_2J_zB4R1FH2EjGMkQjedwc').text)
+                if post_date == '':
+                    logging.warning(f'Missed the date {username}')
+                    continue
             except:
-                post_date = "----------"
-            print(post_date)
+                logging.warning(f'Missed the date {username}')
+                continue
+            logging.info(f'The {username} parsed seccessfully')
             data.append({
                 'UNIQUE_ID': str(uuid.uuid1()),
                 'post URL': post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href'),
@@ -94,29 +129,26 @@ def get_content(html):
                 'number of comments': post.find_element_by_class_name('_1UoeAeSRhOKSNdY_h3iS1O').text,
                 'number of votes': post.find_element_by_class_name('_1E9mcoVn4MYnuBQSVDt1gC').text,
             })
-
+            id_list.append(post.get_attribute('id'))
 
 
 def parse():
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
+        logging.info('Connection established')
         driver.get(html.url)
-        # actions = ActionChains(driver)
-        # time.sleep(3)
         while len(id_list) < 100:
             get_content(html)
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            # section = driver.find_element_by_id(id_list[count])
-            # actions.move_to_element(section).perform()
+            # driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            group_posts_next = driver.find_element_by_id(id_list[len(id_list)-1])
+            group_posts_next.location_once_scrolled_into_view
         save_file(data)
-
-        # print(data)
-        # print(id_list)
-        print(len(id_list), 'end')
         driver.close()
         driver.quit()
-    else:
-        print('error')
+        logging.info(f'Job well done. Parsed {len(id_list)} posts')
+        logging.info(f'The script work time {int(time.time() - start)} seconds')
 
+    else:
+        logging.error(f'Connection error: {html.status_code}')
 
 parse()
