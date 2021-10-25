@@ -14,6 +14,8 @@ HEADERS = {
 
 PARAMS = {'t': 'month'}
 
+HOST = 'https://www.reddit.com/'
+
 id_list = []
 data = []
 
@@ -52,8 +54,9 @@ def get_content(html):
             id_list.append(post.get_attribute('id'))
             # mouse_over_class_name('_2tbHP6ZydRpjI44J3syuqC')
             username = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
-            # print(username)
-            
+            request = requests.get(f'{HOST}user/{username}/about.json', headers=HEADERS)
+            comment_karma = request.json().get('data').get('comment_karma')
+            # print(comment_karma)
             data.append({
                 'UNIQUE_ID': str(uuid.uuid1()),
                 'post URL': post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href'),
