@@ -51,6 +51,8 @@ def get_content(html):
         if post.get_attribute('id') not in id_list and len(id_list) < 100:
             id_list.append(post.get_attribute('id'))
             # mouse_over_class_name('_2tbHP6ZydRpjI44J3syuqC')
+            username = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
+            # print(username)
             
             data.append({
                 'UNIQUE_ID': str(uuid.uuid1()),
