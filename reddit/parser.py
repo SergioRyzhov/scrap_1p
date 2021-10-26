@@ -63,7 +63,8 @@ def save_file(items):
                     f"{item['comment karma']};",
                     f"{item['post date']};",
                     f"{item['number of comments']};",
-                    f"{item['number of votes']};\n",
+                    f"{item['number of votes']};",
+                    f"{item['post category']};\n",
                 ])
             logging.info('File written seccessfully')
         except:
@@ -164,6 +165,12 @@ def get_content(html):
                 continue
 
             try:
+                post_category = post.find_element_by_class_name('_2mHuuvyV9doV3zwbZPtIPG').text.replace('r/','')
+            except:
+                logging.warning(f'Missed the post_category {username}')
+                continue
+
+            try:
                 open_user = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC')
                 driver.execute_script(f'window.open("{open_user.get_attribute("href")}", "new_window")')
                 driver.switch_to.window(driver.window_handles[1])
@@ -187,6 +194,7 @@ def get_content(html):
                 'post date': post_date,
                 'number of comments': number_of_comments,
                 'number of votes': number_of_votes,
+                'post category': post_category,
             })
             id_list.append(post.get_attribute('id'))
             logging.info(f'[№{len(id_list)}] The {username} parsed seccessfully')
