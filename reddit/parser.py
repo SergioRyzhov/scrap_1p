@@ -32,9 +32,13 @@ options = Options()
 options.add_argument('--disable-infobars')
 # options.add_argument('start-maximized')
 options.add_argument('--disable-extensions')
-options.add_argument("--disable-notifications")
+options.add_argument('--disable-notifications')
+options.add_argument('--blink-settings=imagesEnabled=false')
+options.add_argument('--autoplay-policy=no-user-gesture-required')
 options.add_experimental_option(
     "prefs", {"profile.default_content_setting_values.notifications": 1})
+options.add_experimental_option(
+    "prefs", {"profile.managed_default_content_settings.images": 2})
 options.add_experimental_option("excludeSwitches", ["enable-logging"])
 driver = webdriver.Chrome(
     options=options, executable_path='D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe')
@@ -54,6 +58,7 @@ def save_file(items):
                     f"{item['post URL']};",
                     f"{item['username']};",
                     f"{item['user karma']};",
+                    f"{item['user cake day']};",
                     f"{item['post karma']};",
                     f"{item['comment karma']};",
                     f"{item['post date']};",
@@ -71,6 +76,18 @@ def get_content(html):
 
     for post in found_posts:
         if post.get_attribute('id') not in id_list and len(id_list) < 100:
+            try:
+                open_user = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC')
+                driver.execute_script(f'window.open("{open_user.get_attribute("href")}", "new_window")')
+                driver.switch_to.window(driver.window_handles[1])
+                cake_day = driver.find_element_by_id('profile--id-card--highlight-tooltip--cakeday').text
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+            except:
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+                logging.warning(f"You must be 18+ to view this community")
+                continue
             try:
                 pub_date_elem = post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s')
                 pub_date_elem.location_once_scrolled_into_view
@@ -117,12 +134,12 @@ def get_content(html):
             except:
                 logging.warning(f'Missed the date {username}')
                 continue
-            logging.info(f'The {username} parsed seccessfully')
             data.append({
                 'UNIQUE_ID': str(uuid.uuid1()),
                 'post URL': post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href'),
                 'username': username,
                 'user karma': int(user_karma),
+                'user cake day': cake_day,
                 'post karma': int(post_karma),
                 'comment karma': int(comment_karma),
                 'post date': post_date,
@@ -130,7 +147,7 @@ def get_content(html):
                 'number of votes': post.find_element_by_class_name('_1E9mcoVn4MYnuBQSVDt1gC').text,
             })
             id_list.append(post.get_attribute('id'))
-
+            logging.info(f'[№{len(id_list)}] The {username} parsed seccessfully')
 
 def parse():
     html = get_html(URL, PARAMS)
