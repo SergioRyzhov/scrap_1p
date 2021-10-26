@@ -2,8 +2,8 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup as bs
+from datetime import datetime
 import logging
 import time
 import uuid
@@ -50,7 +50,7 @@ def get_html(url, params=None):
 
 
 def save_file(items):
-    with open('reddit.txt', 'w', newline='', encoding='utf-8') as fw:
+    with open(f'reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
         try:
             for item in items:
                 fw.writelines([
