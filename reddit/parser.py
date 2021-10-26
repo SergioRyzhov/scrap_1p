@@ -2,7 +2,6 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup as bs
 import logging
@@ -28,12 +27,14 @@ id_list = []
 data = []
 
 options = Options()
+# options.add_argument('--headless')
 options.add_argument('--disable-infobars')
 # options.add_argument('start-maximized')
 options.add_argument('--disable-extensions')
 options.add_argument('--disable-notifications')
 options.add_argument('--blink-settings=imagesEnabled=false')
 options.add_argument('--autoplay-policy=no-user-gesture-required')
+options.add_argument('--disable-bundled-ppapi-flash')
 options.add_experimental_option(
     "prefs", {"profile.default_content_setting_values.notifications": 1})
 options.add_experimental_option(
@@ -82,7 +83,7 @@ def get_content(html):
             except:
                 logging.warning("Can't find the id")
                 continue
-            if post_id not in id_list and len(id_list) < 100:
+            if post_id not in id_list and len(data) < 100:
                 id_list.append(post_id)
                 try:
                     try:
@@ -222,7 +223,7 @@ def get_content(html):
                 logging.info(
                     f'[№{len(data)}] The {username} parsed seccessfully')
     except:
-        logging.info(f'[№{len(data)}] The {username} parse faled')
+        logging.info(f'[№{len(data)}] The {username} parse failed')
 
 
 def parse():
