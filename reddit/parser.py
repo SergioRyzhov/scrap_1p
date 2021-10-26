@@ -20,7 +20,7 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com/'
 
-SCROLL_TIME_SLEEP = 0.1
+# SCROLL_TIME_SLEEP = 0.2
 
 logging.basicConfig(level=logging.INFO)
 
@@ -77,54 +77,70 @@ def get_content(html):
     for post in found_posts:
         if post.get_attribute('id') not in id_list and len(id_list) < 100:
             try:
-                open_user = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC')
-                driver.execute_script(f'window.open("{open_user.get_attribute("href")}", "new_window")')
-                driver.switch_to.window(driver.window_handles[1])
-                cake_day = driver.find_element_by_id('profile--id-card--highlight-tooltip--cakeday').text
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
-            except:
-                driver.close()
-                driver.switch_to.window(driver.window_handles[0])
-                logging.warning(f"You must be 18+ to view this community")
-                continue
-            try:
-                pub_date_elem = post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s')
-                pub_date_elem.location_once_scrolled_into_view
-                driver.execute_script("window.scrollTo(0, window.scrollY - 60)")
+                try:
+                    pub_date_elem = post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s')
+                except:
+                    logging.warning('pub_date_elem not to find')
+                try:
+                    pub_date_elem.location_once_scrolled_into_view
+                except:
+                    logging.warning("Can't scroll to pub_date_elem")
+                try:
+                    driver.execute_script("window.scrollTo(0, window.scrollY - 80)")
+                except:
+                    logging.warning("Can't scroll -80")
                     # driver.execute_script("arguments[0].scrollIntoView(true);", pub_date_elem)
-                ActionChains(driver).move_to_element(pub_date_elem).perform()
+                # time.sleep(SCROLL_TIME_SLEEP)
+                try:
+                    ActionChains(driver).move_to_element(pub_date_elem).perform()
+                except:
+                    logging.warning("Can't mouseover pub_date_elem")
             except:
                 logging.warning("Missed the post focus")
                 continue
+
             try:
                 username = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
             except:
                 logging.warning('Missed the username')
                 continue
+
+            try:
+                post_url = post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href')
+            except:
+                logging.warning(f'Missed the post_url of {username}')
+                continue
+
             try:
                 request = requests.get(
                     f'{HOST}user/{username}/about.json', headers=HEADERS)
+                if request.json().get('data').get('subreddit').get('over_18'):
+                    logging.warning(f"You must be 18+ to view {username}'s community")
+                    continue
             except:
                 logging.warning(f'Missed the reqest {username}')
                 continue
+
             try:
                 comment_karma = request.json().get('data').get('comment_karma')
             except:
                 logging.warning(f'Missed the comment_karma {username}')
                 continue
+
             try:
                 user_karma = request.json().get('data').get('total_karma')
             except:
                 logging.warning(f'Missed the user_karma {username}')
                 continue
+
             try:
                 post_karma = request.json().get('data').get('link_karma')
             except:
                 logging.warning(f'Missed the post_karma {username}')
                 continue
+
             try:
-                time.sleep(SCROLL_TIME_SLEEP)
+                # time.sleep(SCROLL_TIME_SLEEP)
                 post_date = driver.find_element_by_class_name('_2J_zB4R1FH2EjGMkQjedwc').text
                 # wait = WebDriverWait(driver, 10)
                 # post_date = wait.until(EC.find_element_by_class_name('_2J_zB4R1FH2EjGMkQjedwc').text)
@@ -134,17 +150,43 @@ def get_content(html):
             except:
                 logging.warning(f'Missed the date {username}')
                 continue
+
+            try:
+                number_of_comments = post.find_element_by_class_name('_1UoeAeSRhOKSNdY_h3iS1O').text
+            except:
+                logging.warning(f'Missed the number_of_comments {username}')
+                continue
+
+            try:
+                number_of_votes = post.find_element_by_class_name('_1E9mcoVn4MYnuBQSVDt1gC').text
+            except:
+                logging.warning(f'Missed the number_of_votes {username}')
+                continue
+
+            try:
+                open_user = post.find_element_by_class_name('_2tbHP6ZydRpjI44J3syuqC')
+                driver.execute_script(f'window.open("{open_user.get_attribute("href")}", "new_window")')
+                driver.switch_to.window(driver.window_handles[1])
+                cake_day = driver.find_element_by_id('profile--id-card--highlight-tooltip--cakeday').text
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+            except:
+                driver.close()
+                driver.switch_to.window(driver.window_handles[0])
+                logging.warning(f"Can't open {username} profile")
+                continue
+
             data.append({
                 'UNIQUE_ID': str(uuid.uuid1()),
-                'post URL': post.find_element_by_class_name('_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href'),
+                'post URL': post_url,
                 'username': username,
                 'user karma': int(user_karma),
                 'user cake day': cake_day,
                 'post karma': int(post_karma),
                 'comment karma': int(comment_karma),
                 'post date': post_date,
-                'number of comments': post.find_element_by_class_name('_1UoeAeSRhOKSNdY_h3iS1O').text,
-                'number of votes': post.find_element_by_class_name('_1E9mcoVn4MYnuBQSVDt1gC').text,
+                'number of comments': number_of_comments,
+                'number of votes': number_of_votes,
             })
             id_list.append(post.get_attribute('id'))
             logging.info(f'[№{len(id_list)}] The {username} parsed seccessfully')
@@ -159,6 +201,7 @@ def parse():
             # driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             group_posts_next = driver.find_element_by_id(id_list[len(id_list)-1])
             group_posts_next.location_once_scrolled_into_view
+            driver.execute_script("window.scrollTo(0, window.scrollY - 80)")
         save_file(data)
         driver.close()
         driver.quit()
