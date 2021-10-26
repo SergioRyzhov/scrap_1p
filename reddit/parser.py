@@ -45,11 +45,15 @@ driver = webdriver.Chrome(
 
 
 def get_html(url, params=None):
+    """Does get request and returns response"""
     response = requests.get(url, headers=HEADERS, params=params)
     return response
 
 
 def save_file(items):
+    """Creates reddit-YYYYMMDDHHMM.txt format file and dumps the data.   
+    Returns nothing.
+    """
     with open(f'reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
         try:
             for item in items:
@@ -73,6 +77,10 @@ def save_file(items):
 
 
 def get_content(html):
+    """
+    Main function scraps the data right from the website.
+    Scrapped data appends in data list (global var).
+    """
     try:
         found_posts = driver.find_elements_by_class_name(
             '_1oQyIsiPHYt6nx7VOmd1sz')
@@ -227,6 +235,11 @@ def get_content(html):
 
 
 def parse():
+    """
+    Parse function controls other functions.
+    Creates connection.
+    Looks at filling data and calls functions to scroll blocks with parsed posts.
+    """
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
         logging.info('Connection established')
