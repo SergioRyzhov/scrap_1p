@@ -2,7 +2,6 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from bs4 import BeautifulSoup as bs
 from datetime import datetime
 import logging
 import time
@@ -19,6 +18,7 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com/'
 
+PATH = './chromedriver.exe'
 
 logging.basicConfig(level=logging.INFO)
 
@@ -40,8 +40,15 @@ options.add_experimental_option(
 options.add_experimental_option(
     "prefs", {"profile.managed_default_content_settings.images": 2})
 options.add_experimental_option("excludeSwitches", ["enable-logging"])
-driver = webdriver.Chrome(
-    options=options, executable_path='D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe')
+
+while True:
+    try:
+        driver = webdriver.Chrome(
+            options=options, executable_path=f'{PATH}')
+        break
+    except:
+        logging.error('Not the right path')
+        PATH = input('Input path to chromedriver: ')
 
 
 def get_html(url, params=None):
