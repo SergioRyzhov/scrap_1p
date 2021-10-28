@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime
-from threading import Thread, Barrier
+from threading import Thread
 import logging
 import time
 import uuid
@@ -30,14 +30,19 @@ id_list = []
 data = []
 
 options = Options()
-# options.add_argument('--headless')
-options.add_argument('--disable-infobars')
 # options.add_argument('start-maximized')
+options.add_argument('--window-size=300,1080')
+options.add_argument('--incognito')
+options.add_argument('--disable-infobars')
 options.add_argument('--disable-extensions')
 options.add_argument('--disable-notifications')
-options.add_argument('--blink-settings=imagesEnabled=false')
-options.add_argument('--autoplay-policy=no-user-gesture-required')
+options.add_argument('--disable-default-apps')
 options.add_argument('--disable-bundled-ppapi-flash')
+options.add_argument('--disable-modal-animations')
+options.add_argument('--disable-login-animations')
+options.add_argument('--disable-pull-to-refresh-effect')
+options.add_argument('--blink-settings=imagesEnabled=false')
+options.add_argument('--autoplay-policy=document-user-activation-required')
 options.add_experimental_option(
     "prefs", {"profile.default_content_setting_values.notifications": 1})
 options.add_experimental_option(
@@ -281,7 +286,7 @@ def parse():
 
     logging.info(f'Job well done. Parsed {len(data)} posts')
     logging.info(
-        f'The script work time {(time.time() - start):.2f} seconds')
+        f'The script work time {(time.time() - start) / 60:.2f} minutes')
 
 
 parse()
