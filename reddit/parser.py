@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from datetime import datetime
-from threading import Thread
+from threading import Thread, Barrier
 import logging
 import time
 import uuid
@@ -20,6 +20,8 @@ PARAMS = {'t': 'month'}
 HOST = 'https://www.reddit.com/'
 
 PATH = 'D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe'
+
+NUMBER_OF_THREADS = 3
 
 logging.basicConfig(level=logging.INFO)
 
@@ -75,7 +77,8 @@ def save_file(items):
                 'Writefile error. Try to delete last file.txt manually.')
 
 
-def get_content(x):
+# def get_content(b, i):
+def get_content(i):
     """
     Main function scraps the data right from the website.
     Scrapped data appends in data list (global var).
@@ -83,7 +86,7 @@ def get_content(x):
     driver = webdriver.Chrome(options=options, executable_path=f'{PATH}')
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
-        logging.info('Connection established')
+        logging.info(f'[{i}]Connection established')
         driver.get(html.url)
         while len(data) < 100:
             try:
@@ -95,7 +98,7 @@ def get_content(x):
                     except:
                         logging.warning("Can't find the id")
                         continue
-                    if post_id not in id_list and len(data) < 100:
+                    if post_id not in id_list and len(data) < 99:
                         id_list.append(post_id)
                         try:
                             try:
@@ -106,7 +109,8 @@ def get_content(x):
                             try:
                                 pub_date_elem.location_once_scrolled_into_view
                             except:
-                                logging.warning("Can't scroll to pub_date_elem")
+                                logging.warning(
+                                    "Can't scroll to pub_date_elem")
                             try:
                                 driver.execute_script(
                                     "window.scrollTo(0, window.scrollY - 80)")
@@ -135,7 +139,8 @@ def get_content(x):
                             post_url = post.find_element_by_class_name(
                                 '_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href')
                         except:
-                            logging.warning(f'Missed the post_url of {username}')
+                            logging.warning(
+                                f'Missed the post_url of {username}')
                             continue
 
                         try:
@@ -152,19 +157,22 @@ def get_content(x):
                         try:
                             comment_karma = request.json().get('data').get('comment_karma')
                         except:
-                            logging.warning(f'Missed the comment_karma {username}')
+                            logging.warning(
+                                f'Missed the comment_karma {username}')
                             continue
 
                         try:
                             user_karma = request.json().get('data').get('total_karma')
                         except:
-                            logging.warning(f'Missed the user_karma {username}')
+                            logging.warning(
+                                f'Missed the user_karma {username}')
                             continue
 
                         try:
                             post_karma = request.json().get('data').get('link_karma')
                         except:
-                            logging.warning(f'Missed the post_karma {username}')
+                            logging.warning(
+                                f'Missed the post_karma {username}')
                             continue
 
                         for _ in range(10):
@@ -193,14 +201,16 @@ def get_content(x):
                             number_of_votes = post.find_element_by_class_name(
                                 '_1E9mcoVn4MYnuBQSVDt1gC').text
                         except:
-                            logging.warning(f'Missed the number_of_votes {username}')
+                            logging.warning(
+                                f'Missed the number_of_votes {username}')
                             continue
 
                         try:
                             post_category = post.find_element_by_class_name(
                                 '_2mHuuvyV9doV3zwbZPtIPG').text.replace('r/', '')
                         except:
-                            logging.warning(f'Missed the post_category {username}')
+                            logging.warning(
+                                f'Missed the post_category {username}')
                             continue
 
                         try:
@@ -218,7 +228,7 @@ def get_content(x):
                             driver.switch_to.window(driver.window_handles[0])
                             logging.warning(f"Can't open {username} profile")
                             continue
-
+                        # b.wait()
                         data.append({
                             'UNIQUE_ID': str(uuid.uuid1()),
                             'post URL': post_url,
@@ -239,7 +249,6 @@ def get_content(x):
     else:
         logging.error(f'Connection error: {html.status_code}')
 
-
     try:
         group_posts_next = driver.find_element_by_id(
             id_list[len(id_list)-1])
@@ -251,27 +260,28 @@ def get_content(x):
         return
 
 
-    
-
 def parse():
     """
     Parse function controls other functions.
     Creates connection.
     Looks at filling data and calls functions to scroll blocks with parsed posts.
     """
+    # barrier = Barrier(NUMBER_OF_THREADS)
+    threads = []
+    for i in range(NUMBER_OF_THREADS):
+        # t = Thread(target=get_content, args=(barrier, i))
+        t = Thread(target=get_content, args=(i,))
+        t.start()
+        threads.append(t)
 
-    t1 = Thread(target=get_content, args=(0,))
-    t2 = Thread(target=get_content, args=(1,))
-    t1.start()
-    t2.start()
-    t1.join()
-    t2.join()
-        
+    for t in threads:
+        t.join()
+
     save_file(data)
 
     logging.info(f'Job well done. Parsed {len(data)} posts')
     logging.info(
-        f'The script work time {int(time.time() - start)} seconds')
+        f'The script work time {(time.time() - start):.2f} seconds')
 
 
 parse()
