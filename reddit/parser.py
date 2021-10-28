@@ -1,5 +1,4 @@
 import requests
-from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -21,7 +20,7 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com/'
 
-PATH = './chromedriver'
+PATH = 'D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe'
 
 NUMBER_OF_THREADS = 2
 
@@ -34,6 +33,7 @@ data = []
 options = Options()
 # options.add_argument('start-maximized')
 options.add_argument('--window-size=1024,1080')
+options.add_argument("--headless")
 options.add_argument('--incognito')
 options.add_argument('--disable-infobars')
 options.add_argument('--disable-extensions')
@@ -90,8 +90,6 @@ def get_content(i):
     Main function scraps the data right from the website.
     Scrapped data appends in data list (global var).
     """
-    display = Display(visible=0, size=(1024, 1080))
-    display.start()
     driver = webdriver.Chrome(options=options, executable_path=f'{PATH}')
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
@@ -99,7 +97,8 @@ def get_content(i):
         driver.get(html.url)
         while len(data) < 100:
             try:
-                found_posts = driver.find_elements(By.CLASS_NAME, '_1oQyIsiPHYt6nx7VOmd1sz')
+                found_posts = driver.find_elements(
+                    By.CLASS_NAME, '_1oQyIsiPHYt6nx7VOmd1sz')
                 for i, post in enumerate(found_posts, 1):
                     try:
                         post_id = post.get_attribute('id')
@@ -110,7 +109,8 @@ def get_content(i):
                         id_list.append(post_id)
                         try:
                             try:
-                                pub_date_elem = post.find_element(By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s')
+                                pub_date_elem = post.find_element(
+                                    By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s')
                             except:
                                 logging.warning('pub_date_elem not found')
                             try:
@@ -136,13 +136,15 @@ def get_content(i):
                             continue
 
                         try:
-                            username = post.find_element(By.CLASS_NAME, '_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
+                            username = post.find_element(
+                                By.CLASS_NAME, '_2tbHP6ZydRpjI44J3syuqC').text.replace('u/', '')
                         except:
                             logging.warning('Missed the username')
                             continue
 
                         try:
-                            post_url = post.find_element(By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href')
+                            post_url = post.find_element(
+                                By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s').get_attribute('href')
                         except:
                             logging.warning(
                                 f'Missed the post_url of {username}')
@@ -182,7 +184,8 @@ def get_content(i):
 
                         for _ in range(10):
                             try:
-                                post_date = driver.find_element(By.CLASS_NAME, '_2J_zB4R1FH2EjGMkQjedwc').text
+                                post_date = driver.find_element(
+                                    By.CLASS_NAME, '_2J_zB4R1FH2EjGMkQjedwc').text
                                 if post_date != '':
                                     break
                             except:
@@ -194,15 +197,17 @@ def get_content(i):
                             continue
 
                         try:
-                            number_of_comments = post.find_element(By.CLASS_NAME, '_1UoeAeSRhOKSNdY_h3iS1O').text
+                            number_of_comments = post.find_element(
+                                By.CLASS_NAME, '_1UoeAeSRhOKSNdY_h3iS1O').text
                         except:
                             logging.warning(
                                 f'Missed the number_of_comments {username}')
                             continue
-                        
+
                         for _ in range(10):
                             try:
-                                number_of_votes = post.find_element(By.CLASS_NAME, '_1E9mcoVn4MYnuBQSVDt1gC').text
+                                number_of_votes = post.find_element(
+                                    By.CLASS_NAME, '_1E9mcoVn4MYnuBQSVDt1gC').text
                                 if number_of_votes != '':
                                     break
                             except:
@@ -213,18 +218,21 @@ def get_content(i):
                             continue
 
                         try:
-                            post_category = post.find_element(By.CLASS_NAME, '_2mHuuvyV9doV3zwbZPtIPG').text.replace('r/', '')
+                            post_category = post.find_element(
+                                By.CLASS_NAME, '_2mHuuvyV9doV3zwbZPtIPG').text.replace('r/', '')
                         except:
                             logging.warning(
                                 f'Missed the post_category {username}')
                             continue
 
                         try:
-                            open_user = post.find_element(By.CLASS_NAME, '_2tbHP6ZydRpjI44J3syuqC')
+                            open_user = post.find_element(
+                                By.CLASS_NAME, '_2tbHP6ZydRpjI44J3syuqC')
                             driver.execute_script(
                                 f'window.open("{open_user.get_attribute("href")}", "new_window")')
                             driver.switch_to.window(driver.window_handles[1])
-                            cake_day = driver.find_element(By.ID, 'profile--id-card--highlight-tooltip--cakeday').text
+                            cake_day = driver.find_element(
+                                By.ID, 'profile--id-card--highlight-tooltip--cakeday').text
                             driver.close()
                             driver.switch_to.window(driver.window_handles[0])
                         except:
@@ -260,7 +268,6 @@ def get_content(i):
         logging.warning(f'Missed scrolling')
     driver.close()
     driver.quit()
-    display.close()
 
 
 def parse():
