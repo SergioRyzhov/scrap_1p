@@ -18,7 +18,7 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com/'
 
-PATH = './chromedriver.exe'
+PATH = 'D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe'
 
 logging.basicConfig(level=logging.INFO)
 
@@ -41,15 +41,7 @@ options.add_experimental_option(
     "prefs", {"profile.managed_default_content_settings.images": 2})
 options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
-while True:
-    try:
-        driver = webdriver.Chrome(
-            options=options, executable_path=f'{PATH}')
-        break
-    except:
-        logging.error('Not the right path')
-        PATH = input('Input path to chromedriver: ')
-
+driver = webdriver.Chrome(options=options, executable_path=f'{PATH}')
 
 def get_html(url, params=None):
     """Does get request and returns response"""
