@@ -62,7 +62,7 @@ def save_file(items):
     """Creates reddit-YYYYMMDDHHMM.txt format file and dumps the data.   
     Returns nothing.
     """
-    with open(f'./reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
+    with open(f'reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
         try:
             for item in items:
                 fw.writelines([
@@ -266,8 +266,9 @@ def get_content(i):
         group_posts_next.location_once_scrolled_into_view
     except:
         logging.warning(f'Missed scrolling')
-    driver.close()
-    driver.quit()
+        driver.close()
+        driver.quit()
+        return
 
 
 def parse():
