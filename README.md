@@ -29,7 +29,7 @@ pip install --upgrade pip
 
 pip install selenium
 
--Now you can lunch the script:
+- Now you can lunch the script:
 type:
 
 python "<script folder>\parser.py" (for example: python "D:\Desktop\reddit\parser.py")
