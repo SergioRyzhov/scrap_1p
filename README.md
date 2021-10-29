@@ -1,6 +1,7 @@
 HOW TO USE IT
 
-WINDOWS:
+
+=================================   WINDOWS:   ==============
 
 =========Requirements:
 - Installed python 3
@@ -25,6 +26,7 @@ for windows OS. The version must be the same like chrome browser.
 type:
 
 pip install --upgrade pip
+
 pip install selenium
 
 -Now you can lunch the script:
