@@ -29,7 +29,7 @@ pip install --upgrade pip
 
 pip install selenium
 
--Now you can lunch the script:
+- Now you can lunch the script:
 type:
 
 python "<script folder>\parser.py" (for example: python "D:\Desktop\reddit\parser.py")
@@ -79,7 +79,7 @@ pip install --upgrade pip
 
 pip install pyvirtualdisplay selenium
 
--Now, you can lunch the script:
+- Now, you can lunch the script:
 type:
 
 python3 "<script folder>/parser_linux.py" (for example: python '/home/username/reddit/parser_linux.py')
