@@ -16,7 +16,7 @@ for windows OS. The version must be the same like chrome browser.
 
 - Put the unzipped file into the script folder (in folder must be parser.py and chromedriver.exe)
 
-- Open parser.py file by any text redactor. Find the PATH variable at the line 23. Write your path '<script folder>chromedriver.exe' (for example: PATH = 'D:/Desktop/reddit/chromedriver.exe')
+- Open parser.py file by any text redactor. Find the PATH variable at the line 23. Write your path '<script folder>' (for example: PATH = 'D:/Desktop/reddit/')
 
 =========lunch:
 - Open powershell
@@ -32,7 +32,7 @@ type:
 
 python "<script folder>\parser.py" (for example: python "D:\Desktop\reddit\parser.py")
 
-When script done it created .txt file in the same folder.
+When script done it will create .txt file in the same folder.
 
 
 
@@ -78,4 +78,4 @@ type:
 
 python3 "<script folder>/parser_linux.py" (for example: python '/home/username/reddit/parser_linux.py')
 
-When script done it created .txt file in the Home folder.
+When script done it will create .txt file in the Home folder.

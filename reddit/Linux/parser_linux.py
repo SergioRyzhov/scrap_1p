@@ -1,4 +1,5 @@
 import requests
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
@@ -20,7 +21,7 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com/'
 
-PATH = 'D:/Рабочий стол/scrap_1p/reddit/'
+PATH = '/home/sergio/reddit/chromedriver'
 
 NUMBER_OF_THREADS = 2
 
@@ -33,7 +34,6 @@ data = []
 options = Options()
 # options.add_argument('start-maximized')
 options.add_argument('--window-size=1024,1080')
-options.add_argument("--headless")
 options.add_argument('--incognito')
 options.add_argument('--disable-infobars')
 options.add_argument('--disable-extensions')
@@ -62,7 +62,7 @@ def save_file(items):
     """Creates reddit-YYYYMMDDHHMM.txt format file and dumps the data.   
     Returns nothing.
     """
-    with open(f'{PATH}reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
+    with open(f'reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
         try:
             for item in items:
                 fw.writelines([
@@ -90,7 +90,9 @@ def get_content(i):
     Main function scraps the data right from the website.
     Scrapped data appends in data list (global var).
     """
-    driver = webdriver.Chrome(options=options, executable_path=f'{PATH}chromedriver.exe')
+    display = Display(visible=0, size=(1024, 1080))
+    display.start()
+    driver = webdriver.Chrome(options=options, executable_path=f'{PATH}')
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
         logging.info(f'[{i}]Connection established')
