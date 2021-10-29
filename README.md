@@ -1,6 +1,7 @@
 HOW TO USE IT
 
-WINDOWS:
+
+=================================   WINDOWS:   ==============
 
 =========Requirements:
 - Installed python 3
@@ -25,6 +26,7 @@ for windows OS. The version must be the same like chrome browser.
 type:
 
 pip install --upgrade pip
+
 pip install selenium
 
 -Now you can lunch the script:
@@ -37,7 +39,7 @@ When script done it will create .txt file in the same folder.
 
 
 
-Linux:
+==================================   Linux:   ==============
 
 =========Requirements:
 - Installed python 3
@@ -51,10 +53,13 @@ sudo apt-get install libxss1 libappindicator1 libindicator7
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 
 sudo dpkg -i google-chrome*.deb
+
 sudo apt-get install -f
 
 - Now, let’s install xvfb so we can run Chrome headlessly:
+
 type:
+
 sudo apt-get install xvfb
 
 - Now, you need to download this parser_linux.py
@@ -71,6 +76,7 @@ for Linux OS.
 Open console, type:
 
 pip install --upgrade pip 
+
 pip install pyvirtualdisplay selenium
 
 -Now, you can lunch the script:
