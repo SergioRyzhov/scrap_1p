@@ -18,7 +18,7 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com/'
 
-PATH = 'D:/Рабочий стол/scrap_1p/reddit/chromedriver.exe'
+PATH = 'D:/Рабочий стол/scrap_1p/reddit/'
 
 logging.basicConfig(level=logging.INFO)
 
@@ -41,7 +41,7 @@ options.add_experimental_option(
     "prefs", {"profile.managed_default_content_settings.images": 2})
 options.add_experimental_option("excludeSwitches", ["enable-logging"])
 
-driver = webdriver.Chrome(options=options, executable_path=f'{PATH}')
+driver = webdriver.Chrome(options=options, executable_path=f'{PATH}chromedriver.exe')
 
 def get_html(url, params=None):
     """Does get request and returns response"""
@@ -53,7 +53,7 @@ def save_file(items):
     """Creates reddit-YYYYMMDDHHMM.txt format file and dumps the data.   
     Returns nothing.
     """
-    with open(f'reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
+    with open(f'{PATH}reddit-{datetime.now().strftime("%Y%m%d%H%M")}.txt', 'w', newline='', encoding='utf-8') as fw:
         try:
             for item in items:
                 fw.writelines([
