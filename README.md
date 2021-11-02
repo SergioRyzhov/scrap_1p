@@ -1,87 +1,61 @@
-HOW TO USE IT
+# reddit parser
 
+This is a script for collecting the data from posts on reddit.com website.
+What's the data will be collected?
+* post URL
+* username
+* user karma
+* user cake day
+* post karma
+* comment karma
+* post date
+* number of comments
+* number of votes
+* post category
 
-=================================   WINDOWS:   ==============
+At the output, UNIQUE_ID is added by a script.
+The script generates a file report with collected data, in the end.
 
-=========Requirements:
-- Installed python 3
-- Windows OS
-- Chrome browser
-- Console
+## install required libraries to run the script
 
-=========install:
-- First you need to download this parser.py
+### *on windows*
+* install google chrome **https://www.google.com/chrome/**
+* download ChromeDriver **https://chromedriver.chromium.org/downloads**
+*(The version must be the same like chrome browser)*
+* download this файл **[GitHub](parser.py)**
+* put downloaded file and driver in a folder __c:\reddit\\__
+* start console (run -> cmd)
+* input **pip install selenium**
+* input **pip install bs4**
 
-- Second, you need to download chromedriver https://chromedriver.chromium.org/downloads
-for windows OS. The version must be the same like chrome browser.
+### *on linux*
+* install google chrome **https://www.google.com/chrome/?platform=linux**
+* download ChromeDriver **https://chromedriver.chromium.org/downloads** *(for linux)*
+*(The version must be the same like chrome browser)*
+* download this файл **[GitHub](parser_linux.py)**
+* put downloaded file and driver in a folder **/Home/reddit/**
+* open console
+> **sudo apt-get install xvfb**
 
-- Put the unzipped file into the script folder (in folder must be parser.py and chromedriver.exe)
+> **pip install selenium**
 
-- Open parser.py file by any text redactor. Find the PATH variable at the line 23. Write your path '<script folder>' (for example: PATH = 'D:/Desktop/reddit/')
+> **pip install bs4**
 
-=========lunch:
-- Open powershell
+> **pip install pyvirtualdisplay**
 
-- To lunch script you needs to install some libs:
-type:
+## start script
 
-pip install --upgrade pip
+The script can be run with or without parameters.
+The parameters are **number_of_posts** и **filename**.
+To run with parameters, you need to specify one or two parameters,
+*for example for windows:*
+* start console (run -> cmd)
+> **python "c:\reddit\parser.py" --number_of_posts=150 --filename=my_filename.txt**
 
-pip install selenium
+*for example for linux:*
+* open console
+> **python3 "/home/reddit/parser_linux.py" --number_of_posts=150 --filename=my_filename.txt**
 
-- Now you can lunch the script:
-type:
-
-python "<script folder>\parser.py" (for example: python "D:\Desktop\reddit\parser.py")
-
-When script done it will create .txt file in the same folder.
-
-
-
-
-==================================   Linux:   ==============
-
-=========Requirements:
-- Installed python 3
-- Linux OS(ubuntu, debian, mint)
-
-=========install:
-- First, install Google Chrome for Debian/Ubuntu:
-open console and type:
-
-sudo apt-get install libxss1 libappindicator1 libindicator7
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-
-sudo dpkg -i google-chrome*.deb
-
-sudo apt-get install -f
-
-- Now, let’s install xvfb so we can run Chrome headlessly:
-
-type:
-
-sudo apt-get install xvfb
-
-- Now, you need to download this parser_linux.py
-
-- Now, you need to download and install chromedriver https://chromedriver.chromium.org/downloads
-for Linux OS.
-
-- Put the unzipped file into the script folder (in folder must be parser_linux.py and chromedriver)
-
-- Open parser.py file by any text redactor. Find the PATH variable at the line 23. Write your path '<script folder>chromedriver' (for example: PATH = '/Home/username/reddit/chromedriver')
-
-=========lunch:
-- To lunch you needs to install some Python dependencies and Selenium:
-Open console, type:
-
-pip install --upgrade pip 
-
-pip install pyvirtualdisplay selenium
-
-- Now, you can lunch the script:
-type:
-
-python3 "<script folder>/parser_linux.py" (for example: python '/home/username/reddit/parser_linux.py')
-
-When script done it will create .txt file in the Home folder.
+The parameters can be omitted, then the default parameters will be used:
+> number_of_posts=100
+> filename=reddit-YYYYMMDDHHmm.txt
