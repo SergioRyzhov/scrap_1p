@@ -1,16 +1,19 @@
+import os
+import time
+import uuid
+import logging
 import argparse
 import requests
+
+from datetime import datetime
+from threading import Thread
 from bs4 import BeautifulSoup as bs
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
-from datetime import datetime
-from threading import Thread
-import logging
-import time
-import uuid
+
 
 URL = 'https://www.reddit.com/top/'
 
@@ -23,7 +26,7 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com'
 
-PATH = 'C:/reddit/'
+PATH = os.environ.get('CHROME_DRIVER')
 
 NUMBER_OF_THREADS = 4
 
@@ -86,7 +89,7 @@ def save_file(items):
     """Creates reddit-YYYYMMDDHHMM.txt format file and dumps the data.   
     Returns nothing.
     """
-    with open(f'{PATH}{FILENAME}', 'w', newline='', encoding='utf-8') as fw:
+    with open(f'{PATH}/{FILENAME}', 'w', newline='', encoding='utf-8') as fw:
         try:
             for item in items:
                 fw.writelines([
@@ -163,7 +166,7 @@ def get_content(thread):
     """
     scroll_list = []
     driver = webdriver.Chrome(
-        options=options, executable_path=f'{PATH}chromedriver.exe')
+        options=options, executable_path=f'{PATH}/chromedriver.exe')
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
         logging.info(f'[{thread}]Connection established')
