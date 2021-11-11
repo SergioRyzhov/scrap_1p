@@ -1,4 +1,5 @@
 import os
+import re
 import json
 import logging
 
@@ -16,9 +17,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 class HttpProcessor(BaseHTTPRequestHandler):
-    def __init__(self, request, client_address, server):
-        super().__init__(request, client_address, server)
-        self.data = []
+    current_data = []        
     
     def save_file(self, items):
         """Creates reddit-YYYYMMDD.txt file and dumps the data"""
@@ -41,23 +40,33 @@ class HttpProcessor(BaseHTTPRequestHandler):
                 logging.info('File written seccessfully')
             except:
                 logging.error('Writefile error')
-
+                
+    def resp(self, error_code, param1, param2):
+        """Reduces the number of header send"""
+        self.send_response(error_code)
+        self.send_header(param1, param2)
+        self.end_headers()
+                
     def do_GET(self):
         """Handle get requests"""
-        self.send_response(200, 'ok')
-        self.send_header('content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write(b'respond')
-        # print(self.headers)
+        if self.path == '/posts/' and self.current_data:
+            self.resp(200, 'content-type', 'application/json')
+            self.wfile.write(bytes(json.dumps(self.current_data, ensure_ascii=False), 'utf-8'))
+        elif re.findall(r'/posts/\S+', self.path) and self.current_data:
+            self.resp(200, 'content-type', 'text/html')
+            path = self.path.replace('/posts/', '')
+            for item in self.current_data:
+                if path == item['UNIQUE_ID']:
+                    self.wfile.write(bytes(';'.join([str(value) for value in item.values()]), 'utf-8'))
+        else:
+            self.resp(404, 'content-type', 'text/html')
 
     def do_POST(self):
         """Handle post requests"""
-        self.send_response(200, 'ok')
-        self.send_header('content-type', 'application/json')
-        self.end_headers()
+        self.resp(200, 'content-type', 'application/json')
         length = int(self.headers.get('Content-Length'))
-        self.data = json.loads(self.rfile.read(length))
-        self.save_file(self.data)
+        HttpProcessor.current_data = json.loads(self.rfile.read(length))
+        self.save_file(HttpProcessor.current_data)
         
 
 
