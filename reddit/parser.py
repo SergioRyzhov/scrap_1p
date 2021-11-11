@@ -1,6 +1,7 @@
 import os
 import time
 import uuid
+import json
 import logging
 import argparse
 import requests
@@ -14,6 +15,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 
+PORT = 8087
+
+HOST = 'http://localhost'
 
 URL = 'https://www.reddit.com/top/'
 
@@ -86,29 +90,12 @@ def get_html(url, params=None):
 
 
 def save_file(items):
-    """Creates reddit-YYYYMMDDHHMM.txt format file and dumps the data.   
-    Returns nothing.
-    """
-    with open(f'{PATH}/{FILENAME}', 'w', newline='', encoding='utf-8') as fw:
-        try:
-            for item in items:
-                fw.writelines([
-                    f"{item['UNIQUE_ID']};",
-                    f"{item['post URL']};",
-                    f"{item['username']};",
-                    f"{item['user karma']};",
-                    f"{item['user cake day']};",
-                    f"{item['post karma']};",
-                    f"{item['comment karma']};",
-                    f"{item['post date']};",
-                    f"{item['number of comments']};",
-                    f"{item['number of votes']};",
-                    f"{item['post category']};\n",
-                ])
-            logging.info('File written seccessfully')
-        except:
-            logging.error(
-                'Writefile error. Try to delete last file.txt manually.')
+    """Transfers json file to the server"""
+    try:
+        requests.post(f'{HOST}:{PORT}', data=json.dumps(items))
+        logging.info('File transferred to the server seccessfully')
+    except:
+        logging.error('File transfer error')
 
 
 def element_mouseover(driver, post):
