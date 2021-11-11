@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import uuid
 import logging
 
 from datetime import datetime
@@ -46,6 +47,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
         self.send_response(error_code)
         self.send_header(param1, param2)
         self.end_headers()
+        if error_code in [400, 401, 404]:
+            self.wfile.write(bytes(f'{error_code}', encoding='utf-8'))
                 
     def do_GET(self):
         """Handle get requests"""
@@ -63,10 +66,53 @@ class HttpProcessor(BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Handle post requests"""
-        self.resp(200, 'content-type', 'application/json')
-        length = int(self.headers.get('Content-Length'))
-        HttpProcessor.current_data = json.loads(self.rfile.read(length))
-        self.save_file(HttpProcessor.current_data)
+        if self.path == '/posts/':
+            if self.current_data:
+                while True:
+                    trigger = True
+                    new_item = {'UNIQUE_ID': str(uuid.uuid1())}
+                    for item in self.current_data:
+                        if new_item['UNIQUE_ID'] == item['UNIQUE_ID']:
+                            trigger = False
+                            break
+                    if trigger:
+                        self.current_data.append(new_item)
+                        self.resp(201, 'content-type', 'application/json')
+                        self.wfile.write(bytes(json.dumps({new_item['UNIQUE_ID']: len(self.current_data) - 1}, ensure_ascii=False), 'utf-8'))
+                        self.save_file(self.current_data)
+                        break
+            else:
+                HttpProcessor.current_data.append({'UNIQUE_ID': str(uuid.uuid1())})
+                self.resp(404, 'content-type', 'application/json')
+                self.wfile.write(bytes(json.dumps({self.current_data[0]['UNIQUE_ID']: 0}, ensure_ascii=False), 'utf-8'))
+                self.save_file(self.current_data)
+        else:        
+            self.resp(200, 'content-type', 'application/json')
+            length = int(self.headers.get('Content-Length'))
+            HttpProcessor.current_data = json.loads(self.rfile.read(length))
+            self.save_file(self.current_data)
+    
+    def do_DELETE(self):
+        if re.findall(r'/posts/\S+', self.path) and self.current_data:
+            self.resp(200, 'content-type', 'text/html')
+            path = self.path.replace('/posts/', '')
+            for item in self.current_data:
+                if path == item['UNIQUE_ID']:
+                    self.current_data.pop(self.current_data.index(item))
+            self.save_file(self.current_data)
+        else:
+            self.resp(404, 'content-type', 'text/html')
+            
+    def do_PUT(self):
+        if re.findall(r'/posts/\S+', self.path) and self.current_data:
+            self.resp(200, 'content-type', 'text/html')
+            path = self.path.replace('/posts/', '')
+            for item in self.current_data:
+                if path == item['UNIQUE_ID']:
+                    self.current_data.pop(self.current_data.index(item))
+            self.save_file(self.current_data)
+        else:
+            self.resp(404, 'content-type', 'text/html')
         
 
 
