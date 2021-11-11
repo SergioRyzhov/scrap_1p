@@ -16,7 +16,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 class HttpProcessor(BaseHTTPRequestHandler):
-    def __init__(self):
+    def __init__(self, request, client_address, server):
+        super().__init__(request, client_address, server)
         self.data = []
     
     def save_file(self, items):
@@ -56,7 +57,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
         self.end_headers()
         length = int(self.headers.get('Content-Length'))
         self.data = json.loads(self.rfile.read(length))
-        print(self.data)
+        self.save_file(self.data)
+        
 
 
 serv = HTTPServer((HOST, PORT), HttpProcessor)

@@ -17,7 +17,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 PORT = 8087
 
-HOST = 'http://localhost'
+API_HOST = 'http://localhost'
 
 URL = 'https://www.reddit.com/top/'
 
@@ -92,7 +92,7 @@ def get_html(url, params=None):
 def save_file(items):
     """Transfers json file to the server"""
     try:
-        requests.post(f'{HOST}:{PORT}', data=json.dumps(items))
+        requests.post(f'{API_HOST}:{PORT}', data=json.dumps(items))
         logging.info('File transferred to the server seccessfully')
     except:
         logging.error('File transfer error')
