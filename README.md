@@ -1,4 +1,4 @@
-# reddit parser
+# reddit parser with api
 
 This is a script for collecting data from posts on reddit.com website.
 What's the data will be collected?
@@ -43,6 +43,14 @@ in console
 
 # script launch
 
+First of all you must run the server.py script
+
+start console (run -> cmd)
+
+    python server.py
+
+The second part is to run parser.py script
+
 The script can be run with or without parameters.
 The parameters are **number_of_posts** and **filename**.
 To run with parameters, you need to specify one or two parameters,
@@ -60,3 +68,40 @@ the parameters can be omitted, then the default parameters will be used
     filename=reddit-YYYYMMDDHHmm.txt
 
 The output file will be in the CHROME_DRIVER environment dir.
+
+# API endpoints
+
+* `GET http://<host_name>:<port>/posts/ `
+Returns content of the entire file in JSON format. If you just started the server, you have to run parser.py first.
+
+For example
+    
+    requests.get('<host_name>:<port>/posts/')
+
+* `GET http://<host_name>:<port>/posts/UNIQUE_ID/`
+Returns content of this post in JSON format.
+
+For example
+
+    requests.get('<host_name>:<port>/29e8b643-43a4-11ec-96c9-50e5493f093d')
+
+* `POST http://<host_name>:<port>/posts/`
+Add new line with a new UNIQUE_ID into the file.
+
+For example
+
+    requests.post('<host_name>:<port>/posts/')
+
+* `DELETE http://<host_name>:<port>/posts/UNIQUE_ID/`
+Delete the line with a UNIQUE_ID in the file.
+
+For example
+
+    requests.delete('<host_name>:<port>/posts/29e8b643-43a4-11ec-96c9-50e5493f093d')
+
+* `PUT http://<host_name>:<port>/posts/UNIQUE_ID/`
+Change the post with a UNIQUE_ID in the file. Need put change information in JSON format.
+
+For example
+
+    requests.put('<host_name>:<port>/posts/29e8b643-43a4-11ec-96c9-50e5493f093d',data=json.dumps({'post category': 'antiwork'}), verify=False)
