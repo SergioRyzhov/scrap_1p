@@ -1,17 +1,21 @@
+import json
+import logging
 import os
 import re
-import json
 import uuid
-
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
-PATH = os.environ.get('CHROME_DRIVER')
-
 HOST = 'localhost'
 
 PORT = 8087
+
+logging.basicConfig(level=logging.INFO)
+
+PATH = os.environ.get('CHROME_DRIVER')
+if not PATH:
+    logging.error('You must create the environment var!')
 
 
 class HttpProcessor(BaseHTTPRequestHandler):
@@ -19,6 +23,9 @@ class HttpProcessor(BaseHTTPRequestHandler):
 
     def save_file(self, items):
         """Creates reddit-YYYYMMDD.txt file and dumps the data"""
+        if not items:
+            logging.error("The data is empty. File hasn't created")
+            return
         with open(f'{PATH}/reddit-{datetime.now().strftime("%Y%m%d")}.txt', 'w', newline='', encoding='utf-8') as fw:
             try:
                 for item in items:
@@ -35,7 +42,9 @@ class HttpProcessor(BaseHTTPRequestHandler):
                         f"{item['number of votes']};",
                         f"{item['post category']};\n",
                     ])
+                logging.info('File write seccesfully')
             except:
+                logging.error('Writefile error')
                 self.resp_text(200, b'Writefile error')
 
     def resp_text(self, error_code, data=b''):
@@ -71,7 +80,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
                         self.resp_json(200, item)
             else:
                 self.resp_text(404)
-        except:
+        except Exception as err:
+            logging.error(err)
             self.resp_text(500)
 
     def do_POST(self):
@@ -91,6 +101,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
                             self.resp_json(
                                 201, {new_item['UNIQUE_ID']: len(self.current_data) - 1})
                             self.save_file(self.current_data)
+                            logging.info('The line added successfully')
                             break
                 else:
                     HttpProcessor.current_data.append(
@@ -103,7 +114,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
                     self.rfile.read(length))
                 self.resp_json(200, self.current_data)
                 self.save_file(self.current_data)
-        except:
+        except Exception as err:
+            logging.error(err)
             self.resp_text(500)
 
     def do_DELETE(self):
@@ -121,7 +133,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
                     self.resp_text(200)
             else:
                 self.resp_text(404)
-        except:
+        except Exception as err:
+            logging.error(err)
             self.resp_text(500)
 
     def do_PUT(self):
@@ -145,9 +158,12 @@ class HttpProcessor(BaseHTTPRequestHandler):
                     self.resp_text(200)
             else:
                 self.resp_text(404)
-        except:
+        except Exception as err:
+            logging.error(err)
             self.resp_text(500)
 
-
-serv = HTTPServer((HOST, PORT), HttpProcessor)
-serv.serve_forever()
+try:
+    serv = HTTPServer((HOST, PORT), HttpProcessor)
+    serv.serve_forever()
+except Exception as err:
+    logging.error(f"{err}. "+"The server isn't ran")

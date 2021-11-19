@@ -1,19 +1,20 @@
+import argparse
+import json
+import logging
 import os
 import time
 import uuid
-import json
-import logging
-import argparse
-import requests
-
 from datetime import datetime
 from threading import Thread
+
+import requests
 from bs4 import BeautifulSoup as bs
+from pyvirtualdisplay import Display
 from selenium import webdriver
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 PORT = 8087
 
@@ -30,9 +31,13 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com'
 
-PATH = os.environ.get('CHROME_DRIVER')
-
 NUMBER_OF_THREADS = 4
+
+if os.name == 'nt':
+    DRIVER_PART = 'chromedriver.exe'
+else:
+    DRIVER_PART = 'chromedriver'
+
 
 parser = argparse.ArgumentParser(description='Reddit post parser')
 parser.add_argument(
@@ -54,6 +59,10 @@ NUMBER_OF_POSTS = args.number_of_posts
 FILENAME = args.filename
 
 logging.basicConfig(level=logging.INFO)
+
+PATH = os.environ.get('CHROME_DRIVER')
+if not PATH:
+    logging.error('You must create the environment var!')
 
 
 start = time.time()
@@ -151,8 +160,11 @@ def get_content(thread):
     Calls some functions for it.
     """
     scroll_list = []
+    if DRIVER_PART == 'chromedriver':
+        display = Display(visible=0, size=(1024, 1080))
+        display.start()
     driver = webdriver.Chrome(
-        options=options, executable_path=f'{PATH}/chromedriver.exe')
+        options=options, executable_path=f'{PATH}/{DRIVER_PART}')
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
         logging.info(f'[{thread}]Connection established')
