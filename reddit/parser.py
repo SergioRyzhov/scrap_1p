@@ -8,6 +8,7 @@ import requests
 from datetime import datetime
 from threading import Thread
 from bs4 import BeautifulSoup as bs
+from pyvirtualdisplay import Display
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -26,9 +27,12 @@ PARAMS = {'t': 'month'}
 
 HOST = 'https://www.reddit.com'
 
-PATH = os.environ.get('CHROME_DRIVER')
-
 NUMBER_OF_THREADS = 4
+
+if os.name == 'nt':
+    DRIVER_PART = 'chromedriver.exe'
+else:
+    DRIVER_PART = 'chromedriver'
 
 parser = argparse.ArgumentParser(description='Reddit post parser')
 parser.add_argument(
@@ -51,6 +55,9 @@ FILENAME = args.filename
 
 logging.basicConfig(level=logging.INFO)
 
+PATH = os.environ.get('CHROME_DRIVER')
+if not PATH:
+    logging.error('You must create the environment var!')
 
 
 start = time.time()
@@ -165,6 +172,9 @@ def get_content(thread):
     Calls some functions for it.
     """
     scroll_list = []
+    if DRIVER_PART == 'chromedriver':
+        display = Display(visible=0, size=(1024, 1080))
+        display.start()
     driver = webdriver.Chrome(
         options=options, executable_path=f'{PATH}/chromedriver.exe')
     html = get_html(URL, PARAMS)
