@@ -176,7 +176,7 @@ def get_content(thread):
         display = Display(visible=0, size=(1024, 1080))
         display.start()
     driver = webdriver.Chrome(
-        options=options, executable_path=f'{PATH}/chromedriver.exe')
+        options=options, executable_path=f'{PATH}/{DRIVER_PART}')
     html = get_html(URL, PARAMS)
     if html.status_code == 200:
         logging.info(f'[{thread}]Connection established')
