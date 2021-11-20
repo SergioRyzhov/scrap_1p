@@ -48,7 +48,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
                 self.resp_text(200, b'Writefile error')
 
     def resp_text(self, error_code, data=b''):
-        """Reduces the number of header send"""
+        """Sends the text respond"""
         self.send_response(error_code, f'{error_code}')
         self.send_header('content-type', 'text/html')
         self.end_headers()
@@ -58,7 +58,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
             self.wfile.write(data)
 
     def resp_json(self, error_code, data):
-        """Reduces the number of header send"""
+        """Sends the json respond"""
         self.send_response(error_code)
         self.send_header('content-type', 'application/json')
         self.end_headers()
@@ -69,7 +69,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
                 bytes(json.dumps(data, ensure_ascii=False), 'utf-8'))
 
     def do_GET(self):
-        """Handle get requests"""
+        """Handles get requests"""
         try:
             if self.path == '/posts/' and self.current_data:
                 self.resp_json(200, self.current_data)
@@ -85,7 +85,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
             self.resp_text(500)
 
     def do_POST(self):
-        """Handle post requests"""
+        """Handles post requests with json or adds new uuid line"""
         try:
             if self.path == '/posts/':
                 if self.current_data:
@@ -119,6 +119,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
             self.resp_text(500)
 
     def do_DELETE(self):
+        """Handles delete requests. Delete element by uuid"""
         try:
             if re.findall(r'/posts/\S+', self.path) and self.current_data:
                 path = self.path.replace('/posts/', '')
@@ -138,6 +139,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
             self.resp_text(500)
 
     def do_PUT(self):
+        """Handles put requests with json. Update element by uuid."""
         try:
             if re.findall(r'/posts/\S+', self.path) and self.current_data:
                 path = self.path.replace('/posts/', '')

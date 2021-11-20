@@ -108,7 +108,8 @@ def save_file(items):
 
 def element_mouseover(driver, post):
     """Hover mouse over element and load JS.
-    Returns element"""
+    Returns element
+    """
     pub_date_elem = post.find_element(By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s')
     pub_date_elem.location_once_scrolled_into_view
     driver.execute_script("window.scrollTo(0, window.scrollY - 80)")
@@ -154,10 +155,8 @@ def get_soup(html):
 
 
 def get_content(thread):
-    """
-    Main function scraps the data right from the website.
+    """Main function scraps the data right from the website.
     Scrapped data appends in data list (global var).
-    Calls some functions for it.
     """
     scroll_list = []
     if DRIVER_PART == 'chromedriver':
@@ -253,8 +252,7 @@ def get_content(thread):
 
 
 def parse():
-    """
-    Parse function controls other functions.
+    """Parse function controls other functions.
     Creates threads.
     Calls save_file function.
     Loggins and of script.
