@@ -5,6 +5,7 @@ import re
 import uuid
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Dict, List
 
 
 HOST = 'localhost'
@@ -21,7 +22,7 @@ if not PATH:
 class HttpProcessor(BaseHTTPRequestHandler):
     current_data = []
 
-    def save_file(self, items):
+    def _save_file(self, items):
         """Creates reddit-YYYYMMDD.txt file and dumps the data"""
         if not items:
             logging.error("The data is empty. File hasn't created")
@@ -47,7 +48,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
                 logging.error('Writefile error')
                 self.resp_text(200, b'Writefile error')
 
-    def resp_text(self, error_code, data=b''):
+    def resp_text(self, error_code: int, data=b''):
         """Sends the text respond"""
         self.send_response(error_code, f'{error_code}')
         self.send_header('content-type', 'text/html')
@@ -57,7 +58,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
         else:
             self.wfile.write(data)
 
-    def resp_json(self, error_code, data):
+    def resp_json(self, error_code: int, data: List[Dict]):
         """Sends the json respond"""
         self.send_response(error_code)
         self.send_header('content-type', 'application/json')
@@ -100,20 +101,20 @@ class HttpProcessor(BaseHTTPRequestHandler):
                             self.current_data.append(new_item)
                             self.resp_json(
                                 201, {new_item['UNIQUE_ID']: len(self.current_data) - 1})
-                            self.save_file(self.current_data)
+                            self._save_file(self.current_data)
                             logging.info('The line added successfully')
                             break
                 else:
                     HttpProcessor.current_data.append(
                         {'UNIQUE_ID': str(uuid.uuid1())})
                     self.resp_json(200, {self.current_data[0]['UNIQUE_ID']: 0})
-                    self.save_file(self.current_data)
+                    self._save_file(self.current_data)
             else:
                 length = int(self.headers.get('Content-Length'))
                 HttpProcessor.current_data = json.loads(
                     self.rfile.read(length))
                 self.resp_json(200, self.current_data)
-                self.save_file(self.current_data)
+                self._save_file(self.current_data)
         except Exception as err:
             logging.error(err)
             self.resp_text(500)
@@ -127,7 +128,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
                 for item in self.current_data:
                     if path == item['UNIQUE_ID']:
                         self.current_data.pop(self.current_data.index(item))
-                        self.save_file(self.current_data)
+                        self._save_file(self.current_data)
                         self.resp_json(200, self.current_data)
                         trigger = False
                 if trigger:
@@ -154,7 +155,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
                                     item.update(
                                         {key_obt: obtained_data[key_obt]})
                                     self.resp_json(200, self.current_data)
-                                    self.save_file(self.current_data)
+                                    self._save_file(self.current_data)
                                     trigger = False
                 if trigger:
                     self.resp_text(200)
