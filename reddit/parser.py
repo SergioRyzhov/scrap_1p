@@ -17,20 +17,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 PORT = 8087
-
 API_HOST = 'http://localhost'
-
 URL = 'https://www.reddit.com/top/'
-
 HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT x.y; Win64; x64; rv:10.0) Gecko/20100101 Firefox/10.0',
     'accept': '*/*'
 }
-
 PARAMS = {'t': 'month'}
-
 HOST = 'https://www.reddit.com'
-
 NUMBER_OF_THREADS = 4
 
 if os.name == 'nt':
@@ -55,7 +49,6 @@ parser.add_argument(
 args = parser.parse_args()
 
 NUMBER_OF_POSTS = args.number_of_posts
-
 FILENAME = args.filename
 
 logging.basicConfig(level=logging.INFO)

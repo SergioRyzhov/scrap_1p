@@ -27,6 +27,8 @@ The script generates a file report with collected data, in the end.
     * (Important! The chromedriver version should be the same as the chrome browser)*
     * create environment variable in windows named CHROME_DRIVER, value - path to downloaded chromedriver.exe
     * install Git **https://git-scm.com/download/win**
+    * install MongoDB
+    * install PostgreSQL(you need to create db 'reddit')
 <br><br>
 
 2.  * clone the repo
@@ -107,8 +109,7 @@ in console
     pip install -r requirements.txt
 <br>
 
-# script launch
-
+# launch script
 
 
 First of all you must run the server.py script
@@ -124,6 +125,10 @@ start console (run -> cmd)
 in terminal
 
     python3 reddit/server.py
+
+The server can start with params username and password to connect PosgreSQL. By default --user=postgres --pass=123
+
+    --user=username --pass=password
 
 The second part is to run parser.py script
 
@@ -153,33 +158,34 @@ The output file will be in the CHROME_DRIVER environment dir.
 Returns content of the entire file in JSON format. If you just started the server, you have to run parser.py first.
 
 For example
-    
-    requests.get('<host_name>:<port>/posts/')
+
+    curl -X GET http://<host_name>:<port>/post/
+
 
 * `GET http://<host_name>:<port>/posts/UNIQUE_ID/`
 Returns content of this post in JSON format.
 
 For example
 
-    requests.get('<host_name>:<port>/29e8b643-43a4-11ec-96c9-50e5493f093d')
+    curl -X GET http://<host_name>:<port>/post/29e8b643-43a4-11ec-96c9-50e5493f093d
 
 * `POST http://<host_name>:<port>/posts/`
 Add new line with a new UNIQUE_ID into the file.
 
 For example
 
-    requests.post('<host_name>:<port>/posts/')
+    curl -X POST http://<host_name>:<port>/posts/
 
 * `DELETE http://<host_name>:<port>/posts/UNIQUE_ID/`
 Delete the line with a UNIQUE_ID in the file.
 
 For example
 
-    requests.delete('<host_name>:<port>/posts/29e8b643-43a4-11ec-96c9-50e5493f093d')
+    curl -X DELETE http://<host_name>:<port>/posts/29e8b643-43a4-11ec-96c9-50e5493f093d
 
 * `PUT http://<host_name>:<port>/posts/UNIQUE_ID/`
 Change the post with a UNIQUE_ID in the file. Need put change information in JSON format.
 
 For example
 
-    requests.put('<host_name>:<port>/posts/29e8b643-43a4-11ec-96c9-50e5493f093d',data=json.dumps({'post category': 'antiwork'}), verify=False)
+    curl -X PUT -H 'Content-type: application/json' --data "{\"post category\": \"antiwork\"}" http://<host_name>:<port>/posts/29e8b643-43a4-11ec-96c9-50e5493f093d
