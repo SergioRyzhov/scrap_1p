@@ -1,20 +1,24 @@
+import argparse
+import json
+import logging
 import os
 import time
 import uuid
-import logging
-import argparse
-import requests
-
 from datetime import datetime
 from threading import Thread
+
+import requests
 from bs4 import BeautifulSoup as bs
 from pyvirtualdisplay import Display
 from selenium import webdriver
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
+PORT = 8087
+
+API_HOST = 'http://localhost'
 
 URL = 'https://www.reddit.com/top/'
 
@@ -93,34 +97,18 @@ def get_html(url, params=None):
 
 
 def save_file(items):
-    """Creates reddit-YYYYMMDDHHMM.txt format file and dumps the data.   
-    Returns nothing.
-    """
-    with open(f'{PATH}/{FILENAME}', 'w', newline='', encoding='utf-8') as fw:
-        try:
-            for item in items:
-                fw.writelines([
-                    f"{item['UNIQUE_ID']};",
-                    f"{item['post URL']};",
-                    f"{item['username']};",
-                    f"{item['user karma']};",
-                    f"{item['user cake day']};",
-                    f"{item['post karma']};",
-                    f"{item['comment karma']};",
-                    f"{item['post date']};",
-                    f"{item['number of comments']};",
-                    f"{item['number of votes']};",
-                    f"{item['post category']};\n",
-                ])
-            logging.info('File written seccessfully')
-        except:
-            logging.error(
-                'Writefile error. Try to delete last file.txt manually.')
+    """Transfers json file to the server"""
+    try:
+        requests.post(f'{API_HOST}:{PORT}', data=json.dumps(items))
+        logging.info('File transferred to the server seccessfully')
+    except:
+        logging.error('File transfer error')
 
 
 def element_mouseover(driver, post):
     """Hover mouse over element and load JS.
-    Returns element"""
+    Returns element
+    """
     pub_date_elem = post.find_element(By.CLASS_NAME, '_3jOxDPIQ0KaOWpzvSQo-1s')
     pub_date_elem.location_once_scrolled_into_view
     driver.execute_script("window.scrollTo(0, window.scrollY - 80)")
@@ -166,10 +154,8 @@ def get_soup(html):
 
 
 def get_content(thread):
-    """
-    Main function scraps the data right from the website.
+    """Main function scraps the data right from the website.
     Scrapped data appends in data list (global var).
-    Calls some functions for it.
     """
     scroll_list = []
     if DRIVER_PART == 'chromedriver':
@@ -261,13 +247,11 @@ def get_content(thread):
                 continue
     else:
         logging.error(f'Connection error: {html.status_code}')
-    driver.close()
     driver.quit()
 
 
 def parse():
-    """
-    Parse function controls other functions.
+    """Parse function controls other functions.
     Creates threads.
     Calls save_file function.
     Loggins and of script.
