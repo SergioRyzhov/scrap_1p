@@ -21,6 +21,25 @@ if not PATH:
 
 class HttpProcessor(BaseHTTPRequestHandler):
     current_data = []
+    if os.path.exists(f'{PATH}/reddit-{datetime.now().strftime("%Y%m%d")}.txt'):
+        try:
+            with open(f'{PATH}/reddit-{datetime.now().strftime("%Y%m%d")}.txt', 'r') as f:
+                for line in f:
+                    line_dict = {}
+                    line_dict['UNIQUE_ID'] = line.split(';')[0]
+                    line_dict['post URL'] = line.split(';')[1]
+                    line_dict['username'] = line.split(';')[2]
+                    line_dict['user karma'] = line.split(';')[3]
+                    line_dict['user cake day'] = line.split(';')[4]
+                    line_dict['post karma'] = line.split(';')[5]
+                    line_dict['comment karma'] = line.split(';')[6]
+                    line_dict['post date'] = line.split(';')[7]
+                    line_dict['number of comments'] = line.split(';')[8]
+                    line_dict['number of votes'] = line.split(';')[9]
+                    line_dict['post category'] = line.split(';')[10]
+                    current_data.append(line_dict)
+        except IOError:
+            logging.error('File read error. File corrupted')
 
     def _save_file(self, items):
         """Creates reddit-YYYYMMDD.txt file and dumps the data"""
