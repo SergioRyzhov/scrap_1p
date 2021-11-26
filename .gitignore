@@ -1,3 +1,4 @@
 reddit/chromedriver.exe
 /venv
 /.idea
+/reddit/__pycache__
