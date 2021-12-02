@@ -58,7 +58,7 @@ class ItemsCrudHandler(CrudHandlerAbs):
             profile_data = {}
         return post_data, profile_data
 
-    def _add_data(self, data: List[Dict[str, Union[int, str]]] = {}) -> bool:
+    def add_data(self, data: List[Dict[str, Union[int, str]]] = {}) -> bool:
         """Add method
 
         One of the CRUD method which creates data in db
@@ -86,7 +86,7 @@ class ItemsCrudHandler(CrudHandlerAbs):
                 break
         return success
 
-    def _read_data(self, requested_id: str = '') -> List[Dict[str, Union[int, str]]]:
+    def read_data(self, requested_id: str = '') -> List[Dict[str, Union[int, str]]]:
         """Read method
 
         The CRUD method which reads the data from db by UNIQUE_ID or without
@@ -135,7 +135,7 @@ class ItemsCrudHandler(CrudHandlerAbs):
                 logging.error('Read data error')
         return response
 
-    def _update_data(self, requested_id: str = '', data: Dict[str, Union[int, str]] = {}) \
+    def update_data(self, requested_id: str = '', data: Dict[str, Union[int, str]] = {}) \
             -> list[Dict[str, Union[int, str]]]:
         """Update method
 
@@ -173,11 +173,11 @@ class ItemsCrudHandler(CrudHandlerAbs):
                                                                     {'$set': {new_item: data[new_item]}}, upsert=True)
                     if new_user_result.raw_result['n'] != 1:
                         break
-            response = self._read_data(requested_id)
+            response = self.read_data(requested_id)
         return response
 
     @staticmethod
-    def _delete_data(requested_id: str = '') -> bool:
+    def delete_data(requested_id: str = '') -> bool:
         """Delete method
 
         The CRUD method which deletes the data in the db by UNIQUE_ID

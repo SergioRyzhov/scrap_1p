@@ -19,6 +19,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
 
     Accepts requests from the client, processes is and sends to work with the db.
     """
+    mongo_obj = Mongo()
+    postgresql_obj = Postgres()
 
     def _load_data(self) -> Union[List[Dict[str, Union[str, int]]], Dict[str, Union[str, int]]]:
         """Load data method
@@ -75,13 +77,13 @@ class HttpProcessor(BaseHTTPRequestHandler):
         """
         try:
             if self.path == '/posts/':
-                result = Mongo()._read_data()
-                result_2 = Postgres()._read_data()
+                result = self.mongo_obj.read_data()
+                result_2 = self.postgresql_obj.read_data()
                 self.resp_json(result) if result or result_2 else self.resp_text(404)
             elif re.findall(r'/posts/\S+', self.path):
                 requested_id = self.path.replace('/posts/', '')
-                result = Mongo()._read_data(requested_id)
-                result_2 = Postgres()._read_data(requested_id)
+                result = self.mongo_obj.read_data(requested_id)
+                result_2 = self.postgresql_obj.read_data(requested_id)
                 self.resp_json(result) if result_2 or result else self.resp_text(404)
             else:
                 self.resp_text(404)
@@ -99,7 +101,7 @@ class HttpProcessor(BaseHTTPRequestHandler):
             if not parsed_data:
                 self.resp_text(404)
             else:
-                if Mongo()._add_data(parsed_data) and Postgres()._add_data(parsed_data):
+                if self.mongo_obj.add_data(parsed_data) and self.postgresql_obj.add_data(parsed_data):
                     self.resp_text(200, 'Parsed data successfully inserted')
                 else:
                     self.resp_text(200, 'Parsed data isn\'t inserted')
@@ -116,8 +118,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
         try:
             if re.findall(r'/posts/\S+', self.path):
                 requested_id = self.path.replace('/posts/', '')
-                result = Mongo()._delete_data(requested_id)
-                result_2 = Postgres()._delete_data(requested_id)
+                result = self.mongo_obj.delete_data(requested_id)
+                result_2 = self.postgresql_obj.delete_data(requested_id)
                 self.resp_text(
                     200, f'post {requested_id} deleted') if result and result_2 else self.resp_text(404)
             else:
@@ -136,8 +138,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
             if re.findall(r'/posts/\S+', self.path):
                 requested_id = self.path.replace('/posts/', '')
                 load_data = self._load_data()
-                result = Mongo()._update_data(requested_id, load_data)
-                result_2 = Postgres()._update_data(requested_id, load_data)
+                result = self.mongo_obj.update_data(requested_id, load_data)
+                result_2 = self.postgresql_obj.update_data(requested_id, load_data)
                 self.resp_json(result) if result and result_2 else self.resp_text(404)
             else:
                 self.resp_text(404)
