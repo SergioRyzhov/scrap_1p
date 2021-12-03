@@ -19,8 +19,10 @@ class HttpProcessor(BaseHTTPRequestHandler):
 
     Accepts requests from the client, processes is and sends to work with the db.
     """
-    mongo_obj = Mongo()
-    postgresql_obj = Postgres()
+
+    def __init__(self):
+        self.mongo_obj = Mongo()
+        self.postgresql_obj = Postgres()
 
     def _load_data(self) -> Union[List[Dict[str, Union[str, int]]], Dict[str, Union[str, int]]]:
         """Load data method
