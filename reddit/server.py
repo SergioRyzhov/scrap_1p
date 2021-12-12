@@ -1,6 +1,7 @@
 import json
 import logging
 import re
+import socketserver
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Dict, List, Union
 
@@ -20,9 +21,8 @@ class HttpProcessor(BaseHTTPRequestHandler):
     Accepts requests from the client, processes is and sends to work with the db.
     """
 
-    def __init__(self):
-        self.mongo_obj = Mongo()
-        self.postgresql_obj = Postgres()
+    mongo_obj = Mongo()
+    postgresql_obj = Postgres()
 
     def _load_data(self) -> Union[List[Dict[str, Union[str, int]]], Dict[str, Union[str, int]]]:
         """Load data method
@@ -107,8 +107,9 @@ class HttpProcessor(BaseHTTPRequestHandler):
                     self.resp_text(200, 'Parsed data successfully inserted')
                 else:
                     self.resp_text(200, 'Parsed data isn\'t inserted')
-        except:
-            logging.error('Server POST error')
+        except Exception as err:
+            logging.error(err)
+            # logging.error('Server POST error')
             self.resp_text(500)
 
     def do_DELETE(self) -> None:
